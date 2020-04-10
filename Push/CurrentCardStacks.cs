@@ -17,5 +17,13 @@ namespace Push
                 new List<ICard>()
             };
         }
+
+        public void Reset()
+        {
+            foreach (var column in Columns)
+            {
+                column.Clear();
+            }
+        }
     }
 }

@@ -9,7 +9,8 @@ namespace Push
         public int PlayerNumber { get; }
         public string PlayerName { get; }
         public Hand CardsInHand { get; set; }
-        public Bank CardsInBank { get; set; }
+        public Hand CardsInBank { get; set; }
+        public bool RollRequired { get; set; } = false;
 
         public Player(int playerNumber, string name = "")
         {
@@ -20,7 +21,7 @@ namespace Push
                 PlayerName = $"Player {playerNumber}";
             }
             CardsInHand = new Hand();
-            CardsInBank = new Bank();
+            CardsInBank = new Hand();
         }
     }
 }

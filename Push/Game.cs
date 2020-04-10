@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Linq;
 
 namespace Push
 {
     public class Game
     {
         private readonly Stack<ICard> _playingDeck;
-        public  IEnumerable<Player> Players;
-        public Player CurrentPlayer { get; }
+        public List<Player> Players;
+        public Player CurrentPlayer { get; private set; }
         public ICard CurrentSelectedCard { get; set; }
         public CurrentCardStacks CurrentCardStack { get; }
 
@@ -35,9 +36,60 @@ namespace Push
             CurrentSelectedCard = null;
         }
 
-        public void EndGame()
+        public void CollectCards(int player1ColumnToKeep, int player2ColumnToKeep)
         {
+            var cardsForPlayer1 = RetrieveCardsFromCurrentStackByColumn(player1ColumnToKeep);
+            GiveCardsToSelectedPlayer(Players[0], cardsForPlayer1);
+            SetRollRequired(Players[0], cardsForPlayer1);
 
+            var cardsForPlayer2 = RetrieveCardsFromCurrentStackByColumn(player2ColumnToKeep);
+            GiveCardsToSelectedPlayer(Players[1], cardsForPlayer2);
+            SetRollRequired(Players[1], cardsForPlayer2);
+
+            CurrentCardStack.Reset();
+        }
+
+        private void SetRollRequired(Player player, IEnumerable<ICard> cards)
+        {
+            var rollRequired = cards.Count(c => c.GetType() == typeof(RollCard));
+            if (rollRequired > 0)
+            {
+                player.RollRequired = true;
+            }
+        }
+
+        private IEnumerable<ICard> RetrieveCardsFromCurrentStackByColumn(int columnNumber)
+        {
+            if(columnNumber > 0)
+            {
+                return CurrentCardStack.Columns[columnNumber - 1];
+            }
+
+            return new List<ICard>();
+        }
+
+        private void GiveCardsToSelectedPlayer(Player player, IEnumerable<ICard> cards)
+        {
+            foreach (var card in cards)
+            {
+                var numberedCard = card as NumberedCard;
+                if(numberedCard != null)
+                {
+                    player.CardsInHand.AddCard(numberedCard);
+                }
+            }
+        }
+
+        private void SwitchActivePlayer()
+        {
+            if(CurrentPlayer.Equals(Players[0]))
+            {
+                CurrentPlayer = Players[1];
+            }
+            else
+            {
+                CurrentPlayer = Players[0];
+            }
         }
 
         public bool DeckIsEmpty()
